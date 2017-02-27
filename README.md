@@ -8,3 +8,7 @@ You must also have a base NUMA architecture.
 Bind the module to CPU_6. If the settings in emulate_nvm.c do not match the actual binding CPU, the module will report an error and exit automatically. In this case, you need to configure it correctly.
     
     $numactl --physcpubind=6 --membind=1 insmod $modname
+    
+/proc file, used to control the delay, bandwidth configuration via bash script. Specifically see scripts /tesh.sh or scripts /hybrid-memory.sh.
+## Support or Contact
+This is developed in the [HUST SCTS&CGCL Lab](http://grid.hust.edu.cn/ "悬停显示"). If you have any questions, please contact Zhuohui Duan(122316931@qq.com), GLHF.
