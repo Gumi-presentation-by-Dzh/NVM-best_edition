@@ -26,7 +26,7 @@ UNCORE_PMU_MODULE=${_PREFIX}/uncore.ko
 CORE_IOCTL=/proc/core_pmu
 UNCORE_IOCTL=/proc/uncore_pmu
 
-INSTALL_MOD=insmod
+INSTALL_MOD=insmod 
 REMOVE_MOD=rmmod
 
 Start()
