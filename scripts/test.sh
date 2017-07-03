@@ -18,7 +18,7 @@
 
 set -e
 
-_PREFIX=/home/syz/Github/NVM
+_PREFIX=$(dirname $(pwd))
 
 CORE_PMU_MODULE=${_PREFIX}/core.ko
 UNCORE_PMU_MODULE=${_PREFIX}/uncore.ko
