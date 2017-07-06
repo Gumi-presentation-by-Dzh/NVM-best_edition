@@ -4,9 +4,9 @@
     NVM_Read_latency_ns = 400
     NVM_Write_latency_ns = 1800
 [Bandwith]:  #Input the ratio of Bandwidth of DRAM / Bandwidth of NVM
-    NVM_bw_ratio = 0
+    NVM_bw_ratio = 2
 [Model]:
-    epoch_duration_us = 100000
+    epoch_duration_us = 100
     type = 1
 [Consumption]:
     NVM_read_w = 100

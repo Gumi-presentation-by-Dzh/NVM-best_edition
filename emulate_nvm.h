@@ -21,3 +21,5 @@ void finish_emulate_nvm(void);
 
 int emulate_nvm_proc_create(void);
 void emulate_nvm_proc_remove(void);
+void show_emulate_parameter(void);
+int emulate_set_config(unsigned int NVM_read, unsigned int NVM_write, unsigned int Duration);

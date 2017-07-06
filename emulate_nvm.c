@@ -324,6 +324,16 @@ static void restore_platform_configuration(void)
 
 #define PR_RESULT()	(ret)? pr_fail: pr_okay
 
+int emulate_set_config(unsigned int NVM_read, unsigned int NVM_write, unsigned int Duration)
+{
+    read_latency_delta_ns = NVM_read;
+    write_latency_delta_ns = NVM_write;
+    emulate_nvm_hrtimer_duration_ns = Duration;
+    pr_info("set_config is over!\n");
+    return 1;
+}
+
+
 void start_emulate_nvm(void)
 {
 	int ret;
@@ -331,15 +341,11 @@ void start_emulate_nvm(void)
 	/*
 	 * Memory read Latency Model
 	 */
-	dram_read_latency_ns  = 100;
-	nvm_read_latency_ns   = 300;
-	read_latency_delta_ns = 200;
+	read_latency_delta_ns = 0;
 
 	/*
 	 * Memory write Latency Model
 	 */
-	dram_write_latency_ns  = 100;
-	nvm_write_latency_ns   = 1900;
 	write_latency_delta_ns = 0;
 	
 	
@@ -403,7 +409,9 @@ out:
 void finish_emulate_nvm(void)
 {
 	if (emulation_started) {
+        pr_info("emualation_started is true and is already to remove\n");
 		emulate_nvm_proc_remove();
+        pr_info("emulate_nvm_pro_remove is over\n");
 		restore_platform_configuration();
 		finish_emulate_bandwidth();
 		finish_emulate_latency();

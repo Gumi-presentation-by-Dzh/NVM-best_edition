@@ -35,7 +35,6 @@
 
 #include "uncore_pmu.h"
 #include "emulate_nvm.h"
-
 #include <asm/setup.h>
 
 #include <linux/pci.h>
@@ -708,14 +707,16 @@ static void uncore_exit(void)
 	 */
 	finish_emulate_nvm();
 	
+    pr_info("emulate_nvm is finished\n");
 	uncore_clear_global_pmu(&uncore_pmu);
 	uncore_proc_remove();
-	uncore_imc_exit();
+    uncore_imc_exit();
 	uncore_cpu_exit();
 	uncore_pci_exit();
 	
 	pr_info("EXIT ON CPU %2d (NODE %2d)",
 		smp_processor_id(), numa_node_id());
+    pr_info("ALL is remove\n");
 }
 
 module_init(uncore_init);

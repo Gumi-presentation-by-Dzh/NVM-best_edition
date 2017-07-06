@@ -20,6 +20,9 @@
 
 #include <asm/uaccess.h>
 
+//#include <string.h>
+//#include <stdlib.h>
+
 #include <linux/list.h>
 #include <linux/init.h>
 #include <linux/errno.h>
@@ -33,16 +36,45 @@ extern u64 read_latency_delta_ns;
 extern u64 write_latency_delta_ns;
 extern u64 hrtimer_jiffies;
 
+u64 DRAM_Read_latency;
+u64 DRAM_Write_latency;
+u64 NVM_Read_latency;
+u64 NVM_Write_latency;
+
+u64 epoch_duration_us;
+
+u64 NVM_write_w;
+u64 NVM_read_w;
+
 u64 read_counts=0;
 u64 write_counts=0;
+
+static DEFINE_MUTEX(emulate_proc_mutex);
+
+#define STRINGLEN 1024
+char global_buffer[STRINGLEN];
+
+int StrToInt(const char* str);
+long long StrToIntCore(const char* digit, bool minus);
+char *strtok(char *str, const char *delim);
 
 static int emulate_nvm_proc_show(struct seq_file *m, void *v)
 {
 	seq_printf(m, "this moment,write counts=%llu, delay_ns=%llu\n, read counts=%llu, delay_ns=%llu\n",
 			write_counts, write_counts*write_latency_delta_ns,read_counts, read_counts*read_latency_delta_ns);
 	
-	seq_printf(m, "total jiffies = %llu\n", hrtimer_jiffies);
-	
+    seq_printf(m, "total jiffies = %llu\n", hrtimer_jiffies);
+
+    seq_printf(m, "DRAM read latency : %llu ns\n", DRAM_Read_latency);
+    seq_printf(m, "DRAM write latency : %llu ns\n",DRAM_Write_latency);
+    seq_printf(m, "NVM read latency : %llu ns\n",NVM_Read_latency);
+    seq_printf(m, "NVM write latency : %llu ns\n",NVM_Write_latency);
+    seq_printf(m, "Epoch duration time : %llu us\n",epoch_duration_us);
+    seq_printf(m, "NVM read consumption: %llu J\n",NVM_read_w);
+    seq_printf(m, "NVM write consumption: %llu J\n",NVM_write_w);
+    
+    //seq_printf(m, "%d,%d\n",read_latency_delta_ns, write_latency_delta_ns);
+
 	return 0;
 }
 
@@ -54,21 +86,38 @@ static int emulate_nvm_proc_open(struct inode *inode, struct file *file)
 static ssize_t emulate_nvm_proc_write(struct file *file, const char __user *buf,
 				   size_t count, loff_t *offs)
 {
-	char ctl[2];
-	
-	if (count !=2 || *offs)
-		return -EINVAL;
-	
-	if (copy_from_user(ctl, buf, count))
-		return -EFAULT;
-	
-	switch (ctl[0]) {
-		/*TODO modify parameters */
-		default:
-			count = -EINVAL;
-	}
+	int len = count;
+	int temp[15];
+    int i=0;
+    char *result = NULL;
+    char delims[] = ",";
 
-	return count;
+	if (copy_from_user(global_buffer, buf, count))
+		return -EFAULT;
+
+    mutex_lock(&emulate_proc_mutex);
+    global_buffer[len] = '\0';
+    result = strtok(global_buffer,delims);
+    while(result != NULL)
+    {
+        temp[i++] = StrToInt(result);
+        result = strtok(NULL,delims);
+    }
+
+    DRAM_Read_latency = temp[0];
+    DRAM_Write_latency = temp[1];
+    NVM_Read_latency = temp[2];
+    NVM_Write_latency = temp[3];
+    epoch_duration_us = temp[4];
+    NVM_read_w = temp[5];
+    NVM_write_w = temp[6];
+
+    pr_info("SET EMULATE_CONFIG");
+    emulate_set_config(NVM_Read_latency-DRAM_Read_latency,NVM_Write_latency-DRAM_Write_latency,epoch_duration_us*1000000);
+    mutex_unlock(&emulate_proc_mutex);
+    pr_info("leave function");
+    show_emulate_parameter();
+    return count;
 }
 
 const struct file_operations emulate_nvm_proc_fops = {
@@ -81,9 +130,9 @@ const struct file_operations emulate_nvm_proc_fops = {
 
 static bool is_proc_registed = false;
 
-int __must_check emulate_nvm_proc_create(void)
+int emulate_nvm_proc_create(void)
 {
-	if (proc_create("emulate_nvm", 0444, NULL, &emulate_nvm_proc_fops)) {
+	if (proc_create("emulate_nvm", 0666, NULL, &emulate_nvm_proc_fops)) {
 		is_proc_registed = true;
 		return 0;
 	}
@@ -93,6 +142,91 @@ int __must_check emulate_nvm_proc_create(void)
 
 void emulate_nvm_proc_remove(void)
 {
-	if (is_proc_registed)
-		remove_proc_entry("emulate_nvm", NULL);
+    pr_info("emulate_nvm_proc_remove is call\n");
+	if (is_proc_registed){
+	    pr_info("is_proc_registed is true call remov_proc_entry\n");
+        remove_proc_entry("emulate_nvm", NULL);  //zheli
+        pr_info("remove_proc_entry is over\n");
+    }
+}
+
+
+enum Status {kValid=0, kInvalid};
+int g_nStatus = kValid;
+
+long long StrToIntCore(const char* digit, bool minus) {
+    int num = 0;
+    while (*digit != '\0') {
+        if (*digit >= '0' && *digit <= '9') {
+            int flag; 
+            flag = minus ? -1 : 1;
+            num = num*10 + flag*(*digit-'0');
+            if ((!minus && num>0x7FFFFFFF) || (minus && num <(signed int)0x80000000)) {
+                num = 0;
+                break;
+            }
+            digit++;
+        } else {
+            num = 0;
+            break;
+        }
+    }
+    if (*digit == '\0') {
+        g_nStatus = kValid;
+    }
+    return num;
+}
+
+int StrToInt(const char* str) {
+    int num = 0; 
+    g_nStatus = kInvalid;
+    if (str != NULL && *str != '\0') {
+        bool minus = false;
+        if (*str == '+')
+            str++;
+        else if (*str == '-') {
+                str++;
+                minus = true;
+            }
+        if (*str != '\0')
+            num = StrToIntCore(str, minus);
+    }
+    return (int)num;
+}
+
+char *strtok(char *str, const char *delim)
+{
+    static char *src= NULL;
+    const char *indelim=delim;
+    int flag=1,index=0;                                
+    char *temp= NULL;
+    if(str==NULL)
+    {
+        str=src;
+    }
+    for(;*str;str++)
+    {
+        delim=indelim;
+        for(;*delim;delim++)
+        {
+            if(*str==*delim)
+            {
+                *str = '\0';
+                index=1; 
+                break;
+            }
+        }
+        if(*str!='\0'&&flag==1)
+        {
+            temp=str;
+            flag=0;  
+        }
+        if(*str!='\0'&&flag==0&&index==1)
+        {
+            src=str;
+            return temp;
+        }
+    }
+    src=str;                              
+    return temp;
 }

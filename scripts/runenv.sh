@@ -7,6 +7,7 @@ UNCORE_PMU_MODULE=${_PREFIX}/uncore.ko
 
 CORE_IOCTL=/proc/core_pmu
 UNCORE_IOCTL=/proc/uncore_pmu
+EMULATER_IOCTL=/proc/emulate_nvm
 
 INSTALL_MOD="sudo numactl --physcpubind=12 --membind=1 insmod"
 REMOVE_MOD="sudo rmmod uncore"
@@ -44,9 +45,14 @@ DRAM_WRITE_LAT=${dict["DRAM_Write_latency_ns"]}
 NVM_BW=${dict["NVM_bw_ratio"]}
 EPOCH_DURATION_US=${dict["epoch_duration_us"]}
 TYPE=${dict["type"]}
+NVM_READCOST=${dict["NVM_read_w"]}
+NVM_WRITECOST=${dict["NVM_write_w"]}
+
+TAG=","
 
 echo $NVM_BW > $UNCORE_IOCTL
 
+echo $DRAM_READ_LAT$TAG$DRAM_WRITE_LAT$TAG$NVM_READ_LAT$TAG$NVM_WRITE_LAT$TAG$EPOCH_DURATION_US$TAG$NVM_READCOST$TAG$NVM_WRITECOST$TAG > $EMULATER_IOCTL
 
 }
 
@@ -79,4 +85,3 @@ fi
 Start
 INIT
 USE
-End

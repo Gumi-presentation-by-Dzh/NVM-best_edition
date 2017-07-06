@@ -94,7 +94,7 @@ static bool is_proc_registed = false;
 
 int uncore_proc_create(void)
 {
-	if (proc_create("uncore_pmu", 0644, NULL, &uncore_proc_fops)) {
+	if (proc_create("uncore_pmu", 0666, NULL, &uncore_proc_fops)) {
 		is_proc_registed = true;
 		return 0;
 	}
