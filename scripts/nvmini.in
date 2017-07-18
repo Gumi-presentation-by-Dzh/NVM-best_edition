@@ -7,7 +7,7 @@
     NVM_bw_ratio = 2
 [Model]:
     epoch_duration_us = 100
-    type = 1
+    type = 0
 [Consumption]:
     NVM_read_w = 100
     NVM_write_w = 2000

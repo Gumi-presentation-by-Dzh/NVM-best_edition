@@ -11,7 +11,9 @@ EMULATER_IOCTL=/proc/emulate_nvm
 
 INSTALL_MOD="sudo numactl --physcpubind=12 --membind=1 insmod"
 REMOVE_MOD="sudo rmmod uncore"
-USE_MOD="numactl --physcpubind=0 --membind=1"
+USE_MOD_NVM="numactl --physcpubind=0 --membind=1"
+USE_MOD_INTERLEAVE="numactl --physcpubind=0 --interleave=all"
+USE_MOD_LIB="numactl --physcpubind=0 --membind=0"
 
 INPUT_COMMAND=$1
 
@@ -58,7 +60,17 @@ echo $DRAM_READ_LAT$TAG$DRAM_WRITE_LAT$TAG$NVM_READ_LAT$TAG$NVM_WRITE_LAT$TAG$EP
 
 USE()
 {
-    ${USE_MOD} ${INPUT_COMMAND}
+    if [ "$TYPE" -eq "1" ]
+    then
+        ${USE_MOD_NVM} ${INPUT_COMMAND}
+    else
+        if [ "$TYPE" -eq "2" ]
+        then
+            ${USE_MOD_INTERLEAVE} ${INPUT_COMMAND}
+        else
+            ${USE_MOD_LIB} ${INPUT_COMMAND}
+        fi
+    fi
 }
 
 End()
