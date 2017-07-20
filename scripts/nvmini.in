@@ -1,13 +1,13 @@
 [Latency]:
-    DRAM_Read_latency_ns = 100
-    DRAM_Write_latency_ns = 200
-    NVM_Read_latency_ns = 400
-    NVM_Write_latency_ns = 1800
+    DRAM_Read_latency_ns = 13.5
+    DRAM_Write_latency_ns = 28.5
+    NVM_Read_latency_ns = 19.5
+    NVM_Write_latency_ns = 171
 [Bandwith]:  #Input the ratio of Bandwidth of DRAM / Bandwidth of NVM
     NVM_bw_ratio = 2
 [Model]:
     epoch_duration_us = 100
     type = 0
 [Consumption]:
-    NVM_read_w = 100
-    NVM_write_w = 2000
+    NVM_read_w = 2.47
+    NVM_write_w = 16.82

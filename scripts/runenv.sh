@@ -15,7 +15,8 @@ USE_MOD_NVM="numactl --physcpubind=0 --membind=1"
 USE_MOD_INTERLEAVE="numactl --physcpubind=0 --interleave=all"
 USE_MOD_LIB="numactl --physcpubind=0 --membind=0"
 
-INPUT_COMMAND=$1
+INPUT_COMMAND=$@
+echo $INPUT_COMMAND
 
 #echo $bw > /proc/uncore_pmu
 
