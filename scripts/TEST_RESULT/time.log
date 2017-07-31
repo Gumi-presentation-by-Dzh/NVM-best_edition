@@ -1,0 +1,28 @@
+
+NVM read latency : 200 ns
+NVM write latency : 400 ns
+
+real	1m21.076s
+user	0m29.649s
+sys	0m51.064s
+
+NVM read latency : 300 ns
+NVM write latency : 400 ns
+
+real	1m29.355s
+user	0m29.587s
+sys	0m59.536s
+
+NVM read latency : 400 ns
+NVM write latency : 400 ns
+
+real	1m38.025s
+user	0m29.611s
+sys	1m8.226s
+
+NVM read latency : 500 ns
+NVM write latency : 400 ns
+
+real	1m46.450s
+user	0m29.616s
+sys	1m16.625s

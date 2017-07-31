@@ -1,6 +1,7 @@
 #!/bin/bash
 
 _PREFIX=$(dirname $(pwd))
+#_PREFIX="/home/ZHduan/NVM-best_edition/"
 
 CORE_PMU_MODULE=${_PREFIX}/core.ko
 UNCORE_PMU_MODULE=${_PREFIX}/uncore.ko
@@ -16,7 +17,7 @@ USE_MOD_INTERLEAVE="numactl --physcpubind=0 --interleave=all"
 USE_MOD_LIB="numactl --physcpubind=0 --membind=0"
 
 INPUT_COMMAND=$@
-echo $INPUT_COMMAND
+#echo $INPUT_COMMAND
 
 #echo $bw > /proc/uncore_pmu
 
@@ -41,6 +42,7 @@ do
     fi
 done < $FILENAME
 
+
 NVM_READ_LAT=${dict["NVM_Read_latency_ns"]}
 NVM_WRITE_LAT=${dict["NVM_Write_latency_ns"]}
 DRAM_READ_LAT=${dict["DRAM_Read_latency_ns"]}
@@ -52,7 +54,6 @@ NVM_READCOST=${dict["NVM_read_w"]}
 NVM_WRITECOST=${dict["NVM_write_w"]}
 
 TAG=","
-
 echo $NVM_BW > $UNCORE_IOCTL
 
 echo $DRAM_READ_LAT$TAG$DRAM_WRITE_LAT$TAG$NVM_READ_LAT$TAG$NVM_WRITE_LAT$TAG$EPOCH_DURATION_US$TAG$NVM_READCOST$TAG$NVM_WRITECOST$TAG > $EMULATER_IOCTL
